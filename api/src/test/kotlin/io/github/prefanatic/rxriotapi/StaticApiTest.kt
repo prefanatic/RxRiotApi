@@ -4,7 +4,7 @@ import org.junit.Test
 import rx.Observable
 
 class StaticApiTest {
-    private val api = RxRiotApi()
+    private val api = RxRiotApi(API_KEY)
 
     @Test
     fun testChampionQueryAverageTimeTaken() {

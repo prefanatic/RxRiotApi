@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.fail
 
 class ChampionApiTest {
-    val api = RxRiotApi()
+    val api = RxRiotApi(API_KEY)
 
     @Test fun getChampions() {
         api.championApi.getChampions()

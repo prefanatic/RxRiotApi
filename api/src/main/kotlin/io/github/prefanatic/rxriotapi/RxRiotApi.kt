@@ -12,9 +12,7 @@ import retrofit.GsonConverterFactory
 import retrofit.Retrofit
 import retrofit.RxJavaCallAdapterFactory
 
-const val API_KEY = "7668418c-0f05-41c9-965c-f3e503d9f42a"
-
-class RxRiotApi {
+public class RxRiotApi(var apiKey: String = "", var region: Int = Region.NA) {
     private val retrofit: Retrofit
     private val summonerInterface: SummonerInterface
     private val staticDataInterface: StaticDataInterface
@@ -52,73 +50,111 @@ class RxRiotApi {
         statusInterface = retrofit.create(StatusInterface::class.java)
     }
 
+    private fun resolveRegion(): String {
+        with (Region) {
+            when (region) {
+                BR -> return "br"
+                EUNE -> return "eune"
+                EUW -> return "euw"
+                KR -> return "kr"
+                LAN -> return "lan"
+                LAS -> return "las"
+                NA -> return "na"
+                OCE -> return "oce"
+                TR -> return "tr"
+                RU -> return "ru"
+                PBE -> return "pbe"
+                else -> return "global" // Never gets hit, but just incase.
+            }
+        }
+    }
+
+    private fun resolvePlatform(): String {
+        with (Region) {
+            when (region) {
+                BR -> return "br1"
+                EUNE -> return "eun1"
+                EUW -> return "euw1"
+                KR -> return "kr"
+                LAN -> return "la1"
+                LAS -> return "la2"
+                NA -> return "na1"
+                OCE -> return "oc1"
+                TR -> return "tr1"
+                RU -> return "ru"
+                PBE -> return "pbe1"
+                else -> return "global" // Never gets hit, but just incase.
+            }
+        }
+    }
+
     /* ***************************
     Champion Api
     ****************************** */
     inner class ChampionApi {
-        public fun getChampions() = championInterface.getChampions("na", API_KEY)
-        public fun getChampionById(id: String) = championInterface.getChampionById("na", id, API_KEY)
+        public fun getChampions() = championInterface.getChampions("na", apiKey)
+        public fun getChampionById(id: String) = championInterface.getChampionById("na", id, apiKey)
     }
 
     /* ***************************
     Current Game Api
     ****************************** */
     inner class CurrentGameApi {
-        public fun getGame(summonerId: String) = currentGameInterface.getCurrentGame("NA1", summonerId, API_KEY)
+        public fun getGame(summonerId: String) = currentGameInterface.getCurrentGame("NA1", summonerId, apiKey)
     }
 
     inner class FeaturedGameApi {
-        public fun getFeaturedGame() = featuredGameInterface.getFeaturedGames(API_KEY)
+        public fun getFeaturedGame() = featuredGameInterface.getFeaturedGames(apiKey)
     }
 
     inner class GameApi {
-        public fun getRecentGames(summonerId: String) = gameInterface.getGames("na", summonerId, API_KEY)
+        public fun getRecentGames(summonerId: String) = gameInterface.getGames("na", summonerId, apiKey)
     }
 
     inner class LeagueApi {
-        public fun getLeaguesBySummonerIds(ids: String) = leagueInterface.leagueBySummoner("na", ids, API_KEY)
-        public fun getLeagueEntriesBySummonerIds(ids: String) = leagueInterface.leagueEntryBySummoner("na", ids, API_KEY)
-        public fun getLeaguesByTeamIds(ids: String) = leagueInterface.leagueByTeamId("na", ids, API_KEY)
-        public fun getLeaguesEntriesByTeamIds(ids: String) = leagueInterface.leagueEntryByTeamId("na", ids, API_KEY)
-        public fun getChallenger() = leagueInterface.challenger("na", API_KEY)
-        public fun getMaster() = leagueInterface.master("na", API_KEY)
+        public fun getLeaguesBySummonerIds(ids: String) = leagueInterface.leagueBySummoner("na", ids, apiKey)
+        public fun getLeagueEntriesBySummonerIds(ids: String) = leagueInterface.leagueEntryBySummoner("na", ids, apiKey)
+        public fun getLeaguesByTeamIds(ids: String) = leagueInterface.leagueByTeamId("na", ids, apiKey)
+        public fun getLeaguesEntriesByTeamIds(ids: String) = leagueInterface.leagueEntryByTeamId("na", ids, apiKey)
+        public fun getChallenger() = leagueInterface.challenger("na", apiKey)
+        public fun getMaster() = leagueInterface.master("na", apiKey)
     }
 
     // Well this isn't using the standard base URL that retrofit is getting.  :'(
     inner class StatusApi {
-        //public fun getShards() = statusInterface.shards(API_KEY)
-        //public fun getShardsByRegion() = statusInterface.getRegionShards("na", API_KEY)
+        //public fun getShards() = statusInterface.shards(apiKey)
+        //public fun getShardsByRegion() = statusInterface.getRegionShards("na", apiKey)
     }
 
     /* ***************************
     Static Data Api
     ****************************** */
     inner class StaticApi {
-        public fun getChampions() = staticDataInterface.getChampions("na", API_KEY)
-        public fun getChampionById(id: String) = staticDataInterface.getChampionById("na", id, API_KEY)
-        public fun getItems() = staticDataInterface.getItems("na", API_KEY)
-        public fun getItemById(id: String) = staticDataInterface.getItemById("na", id, API_KEY)
-        public fun getLanguageStrings() = staticDataInterface.getLanguageStrings("na", API_KEY)
-        public fun getLanguages() = staticDataInterface.getLanguages("na", API_KEY)
-        public fun getMaps() = staticDataInterface.getMaps("na", API_KEY)
-        public fun getMasteries() = staticDataInterface.getMasteries("na", API_KEY)
-        public fun getMasteryById(id: String) = staticDataInterface.getMasteryById("na", id, API_KEY)
-        public fun getRealm() = staticDataInterface.getRealm("na", API_KEY)
-        public fun getRunes() = staticDataInterface.getRunes("na", API_KEY)
-        public fun getRuneById(id: String) = staticDataInterface.getRuneById("na", id, API_KEY)
-        public fun getSummonerSpells() = staticDataInterface.getSummonerSpells("na", API_KEY)
-        public fun getSummonerSpellById(id: String) = staticDataInterface.getSummonerSpellById("na", id, API_KEY)
-        public fun getVersions() = staticDataInterface.getVersions("na", API_KEY)
+        public fun getChampions() = staticDataInterface.getChampions("na", apiKey)
+        public fun getChampionById(id: String) = staticDataInterface.getChampionById("na", id, apiKey)
+        public fun getItems() = staticDataInterface.getItems("na", apiKey)
+        public fun getItemById(id: String) = staticDataInterface.getItemById("na", id, apiKey)
+        public fun getLanguageStrings() = staticDataInterface.getLanguageStrings("na", apiKey)
+        public fun getLanguages() = staticDataInterface.getLanguages("na", apiKey)
+        public fun getMaps() = staticDataInterface.getMaps("na", apiKey)
+        public fun getMasteries() = staticDataInterface.getMasteries("na", apiKey)
+        public fun getMasteryById(id: String) = staticDataInterface.getMasteryById("na", id, apiKey)
+        public fun getRealm() = staticDataInterface.getRealm("na", apiKey)
+        public fun getRunes() = staticDataInterface.getRunes("na", apiKey)
+        public fun getRuneById(id: String) = staticDataInterface.getRuneById("na", id, apiKey)
+        public fun getSummonerSpells() = staticDataInterface.getSummonerSpells("na", apiKey)
+        public fun getSummonerSpellById(id: String) = staticDataInterface.getSummonerSpellById("na", id, apiKey)
+        public fun getVersions() = staticDataInterface.getVersions("na", apiKey)
     }
 
     /* ***************************
     START --- Summoner Api
     ****************************** */
     inner class SummonerApi {
-        public fun summonersByName(names: String) = summonerInterface.byName("na", names, API_KEY)
-        public fun summonersById(ids: String) = summonerInterface.byIds("na", ids, API_KEY)
-        public fun getSummonerNamesById(ids: String) = summonerInterface.getNames("na", ids, API_KEY)
-        public fun masteriesFromSummonerIds(ids: String) = summonerInterface.getMasteries("na", ids, API_KEY)
-        public fun runesFromSummonerIds(ids: String) = summonerInterface.getRunes("na", ids, API_KEY)
+        public fun summonersByName(names: String) = summonerInterface.byName("na", names, apiKey)
+        public fun summonersById(ids: String) = summonerInterface.byIds("na", ids, apiKey)
+        public fun getSummonerNamesById(ids: String) = summonerInterface.getNames("na", ids, apiKey)
+        public fun masteriesFromSummonerIds(ids: String) = summonerInterface.getMasteries("na", ids, apiKey)
+        public fun runesFromSummonerIds(ids: String) = summonerInterface.getRunes("na", ids, apiKey)
     }
 }
