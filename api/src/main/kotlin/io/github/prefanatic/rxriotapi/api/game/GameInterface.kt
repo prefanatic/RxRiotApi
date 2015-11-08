@@ -1,4 +1,4 @@
-package io.github.prefanatic.rxriotapi.game
+package io.github.prefanatic.rxriotapi.api.game
 
 import retrofit.http.GET
 import retrofit.http.Path

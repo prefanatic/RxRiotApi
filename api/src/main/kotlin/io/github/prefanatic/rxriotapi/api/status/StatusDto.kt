@@ -1,4 +1,4 @@
-package io.github.prefanatic.rxriotapi.status
+package io.github.prefanatic.rxriotapi.api.status
 
 data class ShardStatus(val hostname: String, val locales: MutableList<String>, val name: String, val region_tag: String, val services: MutableList<Service>, val slug: String)
 data class Service(val incidents: MutableList<Incident>, val name: String, val slug: String, val status: String)

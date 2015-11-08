@@ -1,4 +1,4 @@
-package io.github.prefanatic.rxriotapi.status
+package io.github.prefanatic.rxriotapi.api.status
 
 import retrofit.http.GET
 import retrofit.http.Query

@@ -1,19 +1,21 @@
 package io.github.prefanatic.rxriotapi
 
-import io.github.prefanatic.rxriotapi.champion.ChampionInterface
-import io.github.prefanatic.rxriotapi.currentgame.CurrentGameInterface
-import io.github.prefanatic.rxriotapi.featuredgame.FeaturedGameInterface
-import io.github.prefanatic.rxriotapi.game.GameInterface
-import io.github.prefanatic.rxriotapi.league.LeagueInterface
-import io.github.prefanatic.rxriotapi.staticdata.StaticDataInterface
-import io.github.prefanatic.rxriotapi.status.StatusInterface
-import io.github.prefanatic.rxriotapi.summoner.SummonerInterface
+import com.squareup.okhttp.OkHttpClient
+import io.github.prefanatic.rxriotapi.api.champion.ChampionInterface
+import io.github.prefanatic.rxriotapi.api.currentgame.CurrentGameInterface
+import io.github.prefanatic.rxriotapi.api.featuredgame.FeaturedGameInterface
+import io.github.prefanatic.rxriotapi.api.game.GameInterface
+import io.github.prefanatic.rxriotapi.api.league.LeagueInterface
+import io.github.prefanatic.rxriotapi.api.staticdata.StaticDataInterface
+import io.github.prefanatic.rxriotapi.api.status.StatusInterface
+import io.github.prefanatic.rxriotapi.api.summoner.SummonerInterface
 import retrofit.GsonConverterFactory
 import retrofit.Retrofit
 import retrofit.RxJavaCallAdapterFactory
 
-public class RxRiotApi(var apiKey: String = "", var region: Int = Region.NA) {
+public class RxRiotApi(var apiKey: String = "", region: Int = Region.NA, var cache: Cache? = null) {
     private val retrofit: Retrofit
+
     private val summonerInterface: SummonerInterface
     private val staticDataInterface: StaticDataInterface
     private val championInterface: ChampionInterface
@@ -29,13 +31,25 @@ public class RxRiotApi(var apiKey: String = "", var region: Int = Region.NA) {
     public val gameApi by lazy { GameApi() }
     public val leagueApi by lazy { LeagueApi() }
     public val statusApi by lazy { StatusApi() }
-
     public val staticApi by lazy { StaticApi() }
     public val summonerApi by lazy { SummonerApi() }
 
+    private var _region: String
+    private var _platform: String
+
     init {
+        _region = resolveRegion(region)
+        _platform = resolvePlatform(region)
+
+        val okhttp = OkHttpClient()
+
+        with(okhttp) {
+            interceptors().add(CacheInterceptor(this@RxRiotApi))
+        }
+
         retrofit = Retrofit.Builder()
-                .baseUrl("https://na.api.pvp.net/")
+                .baseUrl("https://$_region.api.pvp.net/")
+                .client(okhttp)
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
@@ -50,9 +64,9 @@ public class RxRiotApi(var apiKey: String = "", var region: Int = Region.NA) {
         statusInterface = retrofit.create(StatusInterface::class.java)
     }
 
-    private fun resolveRegion(): String {
+    private fun resolveRegion(i: Int): String {
         with (Region) {
-            when (region) {
+            when (i) {
                 BR -> return "br"
                 EUNE -> return "eune"
                 EUW -> return "euw"
@@ -69,9 +83,9 @@ public class RxRiotApi(var apiKey: String = "", var region: Int = Region.NA) {
         }
     }
 
-    private fun resolvePlatform(): String {
+    private fun resolvePlatform(i: Int): String {
         with (Region) {
-            when (region) {
+            when (i) {
                 BR -> return "br1"
                 EUNE -> return "eun1"
                 EUW -> return "euw1"
@@ -92,15 +106,15 @@ public class RxRiotApi(var apiKey: String = "", var region: Int = Region.NA) {
     Champion Api
     ****************************** */
     inner class ChampionApi {
-        public fun getChampions() = championInterface.getChampions("na", apiKey)
-        public fun getChampionById(id: String) = championInterface.getChampionById("na", id, apiKey)
+        public fun getChampions() = championInterface.getChampions(_region, apiKey)
+        public fun getChampionById(id: String) = championInterface.getChampionById(_region, id, apiKey)
     }
 
     /* ***************************
     Current Game Api
     ****************************** */
     inner class CurrentGameApi {
-        public fun getGame(summonerId: String) = currentGameInterface.getCurrentGame("NA1", summonerId, apiKey)
+        public fun getGame(summonerId: String) = currentGameInterface.getCurrentGame(_platform, summonerId, apiKey)
     }
 
     inner class FeaturedGameApi {
@@ -108,53 +122,53 @@ public class RxRiotApi(var apiKey: String = "", var region: Int = Region.NA) {
     }
 
     inner class GameApi {
-        public fun getRecentGames(summonerId: String) = gameInterface.getGames("na", summonerId, apiKey)
+        public fun getRecentGames(summonerId: String) = gameInterface.getGames(_region, summonerId, apiKey)
     }
 
     inner class LeagueApi {
-        public fun getLeaguesBySummonerIds(ids: String) = leagueInterface.leagueBySummoner("na", ids, apiKey)
-        public fun getLeagueEntriesBySummonerIds(ids: String) = leagueInterface.leagueEntryBySummoner("na", ids, apiKey)
-        public fun getLeaguesByTeamIds(ids: String) = leagueInterface.leagueByTeamId("na", ids, apiKey)
-        public fun getLeaguesEntriesByTeamIds(ids: String) = leagueInterface.leagueEntryByTeamId("na", ids, apiKey)
-        public fun getChallenger() = leagueInterface.challenger("na", apiKey)
-        public fun getMaster() = leagueInterface.master("na", apiKey)
+        public fun getLeaguesBySummonerIds(ids: String) = leagueInterface.leagueBySummoner(_region, ids, apiKey)
+        public fun getLeagueEntriesBySummonerIds(ids: String) = leagueInterface.leagueEntryBySummoner(_region, ids, apiKey)
+        public fun getLeaguesByTeamIds(ids: String) = leagueInterface.leagueByTeamId(_region, ids, apiKey)
+        public fun getLeaguesEntriesByTeamIds(ids: String) = leagueInterface.leagueEntryByTeamId(_region, ids, apiKey)
+        public fun getChallenger() = leagueInterface.challenger(_region, apiKey)
+        public fun getMaster() = leagueInterface.master(_region, apiKey)
     }
 
     // Well this isn't using the standard base URL that retrofit is getting.  :'(
     inner class StatusApi {
         //public fun getShards() = statusInterface.shards(apiKey)
-        //public fun getShardsByRegion() = statusInterface.getRegionShards("na", apiKey)
+        //public fun getShardsByRegion() = statusInterface.getRegionShards(_region, apiKey)
     }
 
     /* ***************************
     Static Data Api
     ****************************** */
     inner class StaticApi {
-        public fun getChampions() = staticDataInterface.getChampions("na", apiKey)
-        public fun getChampionById(id: String) = staticDataInterface.getChampionById("na", id, apiKey)
-        public fun getItems() = staticDataInterface.getItems("na", apiKey)
-        public fun getItemById(id: String) = staticDataInterface.getItemById("na", id, apiKey)
-        public fun getLanguageStrings() = staticDataInterface.getLanguageStrings("na", apiKey)
-        public fun getLanguages() = staticDataInterface.getLanguages("na", apiKey)
-        public fun getMaps() = staticDataInterface.getMaps("na", apiKey)
-        public fun getMasteries() = staticDataInterface.getMasteries("na", apiKey)
-        public fun getMasteryById(id: String) = staticDataInterface.getMasteryById("na", id, apiKey)
-        public fun getRealm() = staticDataInterface.getRealm("na", apiKey)
-        public fun getRunes() = staticDataInterface.getRunes("na", apiKey)
-        public fun getRuneById(id: String) = staticDataInterface.getRuneById("na", id, apiKey)
-        public fun getSummonerSpells() = staticDataInterface.getSummonerSpells("na", apiKey)
-        public fun getSummonerSpellById(id: String) = staticDataInterface.getSummonerSpellById("na", id, apiKey)
-        public fun getVersions() = staticDataInterface.getVersions("na", apiKey)
+        public fun getChampions() = staticDataInterface.getChampions(_region, apiKey)
+        public fun getChampionById(id: String) = staticDataInterface.getChampionById(_region, id, apiKey)
+        public fun getItems() = staticDataInterface.getItems(_region, apiKey)
+        public fun getItemById(id: String) = staticDataInterface.getItemById(_region, id, apiKey)
+        public fun getLanguageStrings() = staticDataInterface.getLanguageStrings(_region, apiKey)
+        public fun getLanguages() = staticDataInterface.getLanguages(_region, apiKey)
+        public fun getMaps() = staticDataInterface.getMaps(_region, apiKey)
+        public fun getMasteries() = staticDataInterface.getMasteries(_region, apiKey)
+        public fun getMasteryById(id: String) = staticDataInterface.getMasteryById(_region, id, apiKey)
+        public fun getRealm() = staticDataInterface.getRealm(_region, apiKey)
+        public fun getRunes() = staticDataInterface.getRunes(_region, apiKey)
+        public fun getRuneById(id: String) = staticDataInterface.getRuneById(_region, id, apiKey)
+        public fun getSummonerSpells() = staticDataInterface.getSummonerSpells(_region, apiKey)
+        public fun getSummonerSpellById(id: String) = staticDataInterface.getSummonerSpellById(_region, id, apiKey)
+        public fun getVersions() = staticDataInterface.getVersions(_region, apiKey)
     }
 
     /* ***************************
     START --- Summoner Api
     ****************************** */
     inner class SummonerApi {
-        public fun summonersByName(names: String) = summonerInterface.byName("na", names, apiKey)
-        public fun summonersById(ids: String) = summonerInterface.byIds("na", ids, apiKey)
-        public fun getSummonerNamesById(ids: String) = summonerInterface.getNames("na", ids, apiKey)
-        public fun masteriesFromSummonerIds(ids: String) = summonerInterface.getMasteries("na", ids, apiKey)
-        public fun runesFromSummonerIds(ids: String) = summonerInterface.getRunes("na", ids, apiKey)
+        public fun summonersByName(names: String) = summonerInterface.byName(_region, names, apiKey)
+        public fun summonersById(ids: String) = summonerInterface.byIds(_region, ids, apiKey)
+        public fun getSummonerNamesById(ids: String) = summonerInterface.getNames(_region, ids, apiKey)
+        public fun masteriesFromSummonerIds(ids: String) = summonerInterface.getMasteries(_region, ids, apiKey)
+        public fun runesFromSummonerIds(ids: String) = summonerInterface.getRunes(_region, ids, apiKey)
     }
 }

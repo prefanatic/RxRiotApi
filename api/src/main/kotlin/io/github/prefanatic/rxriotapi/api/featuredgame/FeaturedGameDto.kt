@@ -1,4 +1,4 @@
-package io.github.prefanatic.rxriotapi.featuredgame
+package io.github.prefanatic.rxriotapi.api.featuredgame
 
 data class FeaturedGames(val clientRefreshInterval: Long, val gameList: MutableList<FeaturedGameInfo>)
 data class FeaturedGameInfo(val bannedChampions: MutableList<BannedChampion>, val gameId: Long, val gameLength: Long, val gameMode: String, val gameQueueConfigId: Long, val gameStartTime: Long,

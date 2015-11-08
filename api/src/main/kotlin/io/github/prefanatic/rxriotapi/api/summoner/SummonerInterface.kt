@@ -1,4 +1,4 @@
-package io.github.prefanatic.rxriotapi.summoner
+package io.github.prefanatic.rxriotapi.api.summoner
 
 import retrofit.http.GET
 import retrofit.http.Path

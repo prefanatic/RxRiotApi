@@ -4,7 +4,7 @@ import org.junit.Test
 import rx.Observable
 
 class StaticApiTest {
-    private val api = RxRiotApi(API_KEY)
+    private val api = RxRiotApi(API_KEY, cache = MockCache())
 
     @Test
     fun testChampionQueryAverageTimeTaken() {

@@ -1,4 +1,4 @@
-package io.github.prefanatic.rxriotapi.summoner
+package io.github.prefanatic.rxriotapi.api.summoner
 
 data class Summoner(val id: Long, val name: String, val profileIconId: Int, val revisionDate: Long, val summonerLevel: Long)
 

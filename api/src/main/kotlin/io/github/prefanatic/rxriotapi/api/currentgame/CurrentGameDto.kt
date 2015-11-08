@@ -1,4 +1,4 @@
-package io.github.prefanatic.rxriotapi.currentgame
+package io.github.prefanatic.rxriotapi.api.currentgame
 
 data class CurrentGameInfo(val bannedChampions: MutableList<BannedChampion>, val gameId: Long, val gameLength: Long, val gameMode: String, val gameQueueConfigId: Long,
                            val gameStartTime: Long, val gameType: String, val mapId: Long, val observers: Observer, val participants: MutableList<CurrentGameParticipant>,

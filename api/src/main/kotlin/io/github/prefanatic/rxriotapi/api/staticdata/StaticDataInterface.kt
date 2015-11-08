@@ -1,4 +1,4 @@
-package io.github.prefanatic.rxriotapi.staticdata
+package io.github.prefanatic.rxriotapi.api.staticdata
 
 import retrofit.http.*
 import rx.Observable
@@ -11,6 +11,7 @@ interface StaticDataInterface {
             @Query("champData") champData: String = "all"
     ): Observable<ChampionList>
 
+    @Headers("RxRiotApiStaleIn: 10000")
     @GET("api/lol/static-data/{region}/v1.2/champion/{id}")
     public fun getChampionById(
             @Path("region") region: String,
