@@ -6,7 +6,7 @@ class CurrentGameApiTest {
     val api = RxRiotApi(API_KEY)
 
     @Test fun getGameFromSummonerName() {
-        api.summonerApi.summonersByName("craxyalpaca")
+        api.summonerApi.getByName("craxyalpaca")
                 .flatMapIterable { it.values }
                 .first()
                 .doOnNext { println("Found summoner ${it.name} (${it.id})") }

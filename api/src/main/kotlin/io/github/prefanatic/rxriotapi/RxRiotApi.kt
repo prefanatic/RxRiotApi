@@ -6,9 +6,16 @@ import io.github.prefanatic.rxriotapi.api.currentgame.CurrentGameInterface
 import io.github.prefanatic.rxriotapi.api.featuredgame.FeaturedGameInterface
 import io.github.prefanatic.rxriotapi.api.game.GameInterface
 import io.github.prefanatic.rxriotapi.api.league.LeagueInterface
+import io.github.prefanatic.rxriotapi.api.match.MatchInterface
+import io.github.prefanatic.rxriotapi.api.matchlist.MatchListInterface
 import io.github.prefanatic.rxriotapi.api.staticdata.StaticDataInterface
+import io.github.prefanatic.rxriotapi.api.stats.StatsInterface
 import io.github.prefanatic.rxriotapi.api.status.StatusInterface
 import io.github.prefanatic.rxriotapi.api.summoner.SummonerInterface
+import io.github.prefanatic.rxriotapi.api.team.TeamInterface
+import io.github.prefanatic.rxriotapi.common.cache.Cache
+import io.github.prefanatic.rxriotapi.common.resolvePlatform
+import io.github.prefanatic.rxriotapi.common.resolveRegion
 import retrofit.GsonConverterFactory
 import retrofit.Retrofit
 import retrofit.RxJavaCallAdapterFactory
@@ -24,13 +31,21 @@ public class RxRiotApi(var apiKey: String = "", region: Int = Region.NA, var cac
     private val gameInterface: GameInterface
     private val leagueInterface: LeagueInterface
     private val statusInterface: StatusInterface
+    private val matchInterface: MatchInterface
+    private val matchListInterface: MatchListInterface
+    private val statsInterface: StatsInterface
+    private val teamInterface: TeamInterface
 
-    public val championApi by lazy { ChampionApi() }
+    public val championApi = ChampionApi()
     public val currentGameApi by lazy { CurrentGameApi() }
     public val featuredGameApi by lazy { FeaturedGameApi() }
     public val gameApi by lazy { GameApi() }
     public val leagueApi by lazy { LeagueApi() }
     public val statusApi by lazy { StatusApi() }
+    public val matchApi by lazy { MatchApi() }
+    public val matchListApi by lazy { MatchListApi() }
+    public val statsApi by lazy { StatsApi() }
+    public val teamApi by lazy { TeamApi() }
     public val staticApi by lazy { StaticApi() }
     public val summonerApi by lazy { SummonerApi() }
 
@@ -62,50 +77,16 @@ public class RxRiotApi(var apiKey: String = "", region: Int = Region.NA, var cac
         gameInterface = retrofit.create(GameInterface::class.java)
         leagueInterface = retrofit.create(LeagueInterface::class.java)
         statusInterface = retrofit.create(StatusInterface::class.java)
-    }
-
-    private fun resolveRegion(i: Int): String {
-        with (Region) {
-            when (i) {
-                BR -> return "br"
-                EUNE -> return "eune"
-                EUW -> return "euw"
-                KR -> return "kr"
-                LAN -> return "lan"
-                LAS -> return "las"
-                NA -> return "na"
-                OCE -> return "oce"
-                TR -> return "tr"
-                RU -> return "ru"
-                PBE -> return "pbe"
-                else -> return "global" // Never gets hit, but just incase.
-            }
-        }
-    }
-
-    private fun resolvePlatform(i: Int): String {
-        with (Region) {
-            when (i) {
-                BR -> return "br1"
-                EUNE -> return "eun1"
-                EUW -> return "euw1"
-                KR -> return "kr"
-                LAN -> return "la1"
-                LAS -> return "la2"
-                NA -> return "na1"
-                OCE -> return "oc1"
-                TR -> return "tr1"
-                RU -> return "ru"
-                PBE -> return "pbe1"
-                else -> return "global" // Never gets hit, but just incase.
-            }
-        }
+        matchInterface = retrofit.create(MatchInterface::class.java)
+        matchListInterface = retrofit.create(MatchListInterface::class.java)
+        statsInterface = retrofit.create(StatsInterface::class.java)
+        teamInterface = retrofit.create(TeamInterface::class.java)
     }
 
     /* ***************************
     Champion Api
     ****************************** */
-    inner class ChampionApi {
+    inner class ChampionApi internal constructor() {
         public fun getChampions() = championInterface.getChampions(_region, apiKey)
         public fun getChampionById(id: String) = championInterface.getChampionById(_region, id, apiKey)
     }
@@ -113,19 +94,19 @@ public class RxRiotApi(var apiKey: String = "", region: Int = Region.NA, var cac
     /* ***************************
     Current Game Api
     ****************************** */
-    inner class CurrentGameApi {
+    inner class CurrentGameApi internal constructor() {
         public fun getGame(summonerId: String) = currentGameInterface.getCurrentGame(_platform, summonerId, apiKey)
     }
 
-    inner class FeaturedGameApi {
+    inner class FeaturedGameApi internal constructor() {
         public fun getFeaturedGame() = featuredGameInterface.getFeaturedGames(apiKey)
     }
 
-    inner class GameApi {
+    inner class GameApi internal constructor() {
         public fun getRecentGames(summonerId: String) = gameInterface.getGames(_region, summonerId, apiKey)
     }
 
-    inner class LeagueApi {
+    inner class LeagueApi internal constructor() {
         public fun getLeaguesBySummonerIds(ids: String) = leagueInterface.leagueBySummoner(_region, ids, apiKey)
         public fun getLeagueEntriesBySummonerIds(ids: String) = leagueInterface.leagueEntryBySummoner(_region, ids, apiKey)
         public fun getLeaguesByTeamIds(ids: String) = leagueInterface.leagueByTeamId(_region, ids, apiKey)
@@ -135,15 +116,35 @@ public class RxRiotApi(var apiKey: String = "", region: Int = Region.NA, var cac
     }
 
     // Well this isn't using the standard base URL that retrofit is getting.  :'(
-    inner class StatusApi {
+    inner class StatusApi internal constructor() {
         //public fun getShards() = statusInterface.shards(apiKey)
         //public fun getShardsByRegion() = statusInterface.getRegionShards(_region, apiKey)
+    }
+
+    inner class MatchApi internal constructor() {
+        public fun getMatchById(matchId: Long) = matchInterface.getMatchById(_region, matchId, apiKey)
+        public fun getMatchByIdWithTimeline(matchId: Long) = matchInterface.getMatchById(_region, matchId, apiKey, true)
+    }
+
+    inner class MatchListApi internal constructor() {
+        public fun getMatchList(summonerId: Long) = matchListInterface.getMatchList(_region, summonerId, apiKey)
+        // TODO: We probably should use a builder pattern for getMatchList - has too many filter options!
+    }
+
+    inner class StatsApi internal constructor() {
+        public fun getRankedStats(summonerId: Long) = statsInterface.getRankedStats(_region, summonerId, apiKey)
+        public fun getSummaryStats(summonerId: Long) = statsInterface.getSummaryStats(_region, summonerId, apiKey)
+    }
+
+    inner class TeamApi internal constructor() {
+        public fun getTeamsBySummonerIds(summonerIds: String) = teamInterface.getTeamBySummonerId(_region, summonerIds, apiKey)
+        public fun getTeamsById(teamIds: String) = teamInterface.getTeamById(_region, teamIds, apiKey)
     }
 
     /* ***************************
     Static Data Api
     ****************************** */
-    inner class StaticApi {
+    inner class StaticApi internal constructor() {
         public fun getChampions() = staticDataInterface.getChampions(_region, apiKey)
         public fun getChampionById(id: String) = staticDataInterface.getChampionById(_region, id, apiKey)
         public fun getItems() = staticDataInterface.getItems(_region, apiKey)
@@ -164,11 +165,11 @@ public class RxRiotApi(var apiKey: String = "", region: Int = Region.NA, var cac
     /* ***************************
     START --- Summoner Api
     ****************************** */
-    inner class SummonerApi {
-        public fun summonersByName(names: String) = summonerInterface.byName(_region, names, apiKey)
-        public fun summonersById(ids: String) = summonerInterface.byIds(_region, ids, apiKey)
-        public fun getSummonerNamesById(ids: String) = summonerInterface.getNames(_region, ids, apiKey)
-        public fun masteriesFromSummonerIds(ids: String) = summonerInterface.getMasteries(_region, ids, apiKey)
-        public fun runesFromSummonerIds(ids: String) = summonerInterface.getRunes(_region, ids, apiKey)
+    inner class SummonerApi internal constructor() {
+        public fun getByName(names: String) = summonerInterface.byName(_region, names, apiKey)
+        public fun getById(ids: String) = summonerInterface.byIds(_region, ids, apiKey)
+        public fun getNamesById(ids: String) = summonerInterface.getNames(_region, ids, apiKey)
+        public fun getMasteriesById(ids: String) = summonerInterface.getMasteries(_region, ids, apiKey)
+        public fun getRunesById(ids: String) = summonerInterface.getRunes(_region, ids, apiKey)
     }
 }

@@ -1,10 +1,13 @@
-package io.github.prefanatic.rxriotapi
+package io.github.prefanatic.rxriotapi.api
 
+import io.github.prefanatic.rxriotapi.API_KEY
+import io.github.prefanatic.rxriotapi.RxRiotApi
+import io.github.prefanatic.rxriotapi.`object`.MockDiskCache
 import org.junit.Test
 import rx.Observable
 
 class StaticApiTest {
-    private val api = RxRiotApi(API_KEY, cache = MockCache())
+    private val api = RxRiotApi(API_KEY, cache = MockDiskCache())
 
     @Test
     fun testChampionQueryAverageTimeTaken() {

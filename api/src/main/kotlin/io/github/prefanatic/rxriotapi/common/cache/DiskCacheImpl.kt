@@ -1,4 +1,4 @@
-package io.github.prefanatic.rxriotapi
+package io.github.prefanatic.rxriotapi.common.cache
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -8,10 +8,10 @@ import java.io.File
 import java.net.URL
 import java.nio.charset.Charset
 
-abstract class Cache {
+abstract class DiskCacheImpl: Cache {
     val TYPE = "application/json; charset=UTF-8"
 
-    public fun save(response: Response, staleIn: Int): Response {
+    override public fun save(response: Response, staleIn: Int): Response {
         val body = response.body().string()
         val file = urlToFile(response.request().url())
 
@@ -26,7 +26,7 @@ abstract class Cache {
                 .build()
     }
 
-    public fun load(url: URL): Response? {
+    override public fun load(url: URL): Response? {
         val file = urlToFile(url)
         if (!file.exists()) throw NoSuchFileException(file, reason = "Did not check if exists before calling load.")
 
@@ -52,7 +52,7 @@ abstract class Cache {
 
     public abstract fun getCacheDir(): File
 
-    public fun exists(url: URL): Boolean = urlToFile(url).exists()
+    override public fun exists(url: URL): Boolean = urlToFile(url).exists()
 
     private fun urlToFile(url: URL): File {
         val strUrl = url.path.replace("/", "_").toLowerCase()

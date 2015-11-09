@@ -1,15 +1,15 @@
 package io.github.prefanatic.rxriotapi
 
 public object Region {
-    val BR = 0
-    val EUNE = 1
-    val EUW = 2
-    val KR = 3
-    val LAN = 4
-    val LAS = 5
-    val NA = 6
-    val OCE = 7
-    val TR = 8
-    val RU = 9
-    val PBE = 10
+    const val BR = 0
+    const val EUNE = 1
+    const val EUW = 2
+    const val KR = 3
+    const val LAN = 4
+    const val LAS = 5
+    const val NA = 6
+    const val OCE = 7
+    const val TR = 8
+    const val RU = 9
+    const val PBE = 10
 }
